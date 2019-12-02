@@ -74,7 +74,8 @@ public class MultiCriteriaLabelSetting {
         this.targetLabels = solutions;
 
         queueComparator = Comparator
-                .comparingLong(this::weight)
+        .comparingLong(this::travelTimeWeight)
+                .thenComparingLong(this::weight)
                 .thenComparingLong(l -> l.nTransfers)
                 .thenComparingLong(l -> l.bikeTime)
                 .thenComparingLong(l -> departureTimeCriterion(l) != null ? departureTimeCriterion(l) : 0)
@@ -315,7 +316,7 @@ public class MultiCriteriaLabelSetting {
     }
 
     long travelTimeWeight(Label label) {
-        return (reverse ? -1 : 1) * (label.travelTime) + (long) (label.nTransfers * betaTransfers) + (long) (label.bikeTime * (betaBikeTime - 1.0));
+        return (reverse ? -1 : 1) * (label.travelTime - startTime) + (long) (label.nTransfers * betaTransfers) + (long) (label.bikeTime * (betaBikeTime - 1.0));
     }
 
     private long travelTimeCriterion(Label label) {
