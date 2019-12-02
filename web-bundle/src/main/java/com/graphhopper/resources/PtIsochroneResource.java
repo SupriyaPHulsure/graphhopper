@@ -96,7 +96,7 @@ public class PtIsochroneResource {
 
         GeometryFactory geometryFactory = new GeometryFactory();
         QueryGraph queryGraph = new QueryGraph(graphHopperStorage);
-        final EdgeFilter filter = DefaultEdgeFilter.allEdges(graphHopperStorage.getEncodingManager().getEncoder("foot"));
+        final EdgeFilter filter = DefaultEdgeFilter.allEdges(graphHopperStorage.getEncodingManager().getEncoder("bike"));
         QueryResult queryResult = locationIndex.findClosest(source.lat, source.lon, filter);
         queryGraph.lookup(Collections.singletonList(queryResult));
         if (!queryResult.isValid()) {
@@ -104,7 +104,7 @@ public class PtIsochroneResource {
         }
 
         PtFlagEncoder ptFlagEncoder = (PtFlagEncoder) encodingManager.getEncoder("pt");
-        GraphExplorer graphExplorer = new GraphExplorer(queryGraph, new FastestWeighting(encodingManager.getEncoder("foot")), ptFlagEncoder, gtfsStorage, RealtimeFeed.empty(gtfsStorage), reverseFlow, false, 5.0);
+        GraphExplorer graphExplorer = new GraphExplorer(queryGraph, new FastestWeighting(encodingManager.getEncoder("bike")), ptFlagEncoder, gtfsStorage, RealtimeFeed.empty(gtfsStorage), reverseFlow, false, 5.0);
         MultiCriteriaLabelSetting router = new MultiCriteriaLabelSetting(graphExplorer, ptFlagEncoder, reverseFlow, Double.MAX_VALUE, false, false, false, 1000000, Collections.emptyList());
 
         Map<Coordinate, Double> z1 = new HashMap<>();

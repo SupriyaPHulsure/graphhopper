@@ -25,6 +25,8 @@ import java.util.Iterator;
 
 public class Label {
 
+
+
     static class Transition {
         final Label label;
         final EdgeLabel edge;
@@ -63,6 +65,7 @@ public class Label {
     }
 
     public final long currentTime;
+    public long travelTime;
 
     public final int edge;
     public final int adjNode;
@@ -80,7 +83,7 @@ public class Label {
     public final Label parent;
     public boolean deleted = false;
 
-    Label(long currentTime, int edgeId, int adjNode, int nTransfers, int nBikeDistanceConstraintViolations, double bikeDistance, Long departureTime, long bikeTime, long residualDelay, boolean impossible, Label parent) {
+    Label(long currentTime, int edgeId, int adjNode, int nTransfers, int nBikeDistanceConstraintViolations, double bikeDistance, Long departureTime, long bikeTime, long residualDelay, boolean impossible, Label parent, long travelTime) {
         this.currentTime = currentTime;
         this.edge = edgeId;
         this.adjNode = adjNode;
@@ -92,6 +95,7 @@ public class Label {
         this.residualDelay = residualDelay;
         this.impossible = impossible;
         this.parent = parent;
+        this.travelTime = travelTime;
     }
 
     @Override

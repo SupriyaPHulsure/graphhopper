@@ -134,7 +134,7 @@ public class MultiCriteriaLabelSetting {
             super(0, 0);
             this.from = from;
             this.to = to;
-            Label label = new Label(startTime, EdgeIterator.NO_EDGE, from, 0, 0, 0.0, null, 0, 0, false, null);
+            Label label = new Label(startTime, EdgeIterator.NO_EDGE, from, 0, 0, 0.0, null, 0, 0, false, null, 0);
             ArrayList<Label> labels = new ArrayList<>(1);
             labels.add(label);
             fromMap.put(from, labels);
@@ -155,11 +155,14 @@ public class MultiCriteriaLabelSetting {
                     if (edgeType == GtfsStorage.EdgeType.EXIT_PT && !reverse && ptOnly) return;
                     if ((edgeType == GtfsStorage.EdgeType.ENTER_PT || edgeType == GtfsStorage.EdgeType.EXIT_PT) && (blockedRouteTypes & (1 << edge.get(validityEnc))) != 0)
                         return;
+                    long travelTime;
                     long nextTime;
                     if (reverse) {
-                        nextTime = label.currentTime - explorer.calcTravelTimeMillis(edge, label.currentTime);
+                        nextTime = label.currentTime - explorer.calcTravelTimeMillis(edge, label.currentTime, false);
+                        travelTime = label.currentTime - explorer.calcTravelTimeMillis(edge, label.currentTime, true);
                     } else {
-                        nextTime = label.currentTime + explorer.calcTravelTimeMillis(edge, label.currentTime);
+                        nextTime = label.currentTime + explorer.calcTravelTimeMillis(edge, label.currentTime, false);
+                        travelTime = label.currentTime + explorer.calcTravelTimeMillis(edge, label.currentTime, true);
                     }
                     int nTransfers = label.nTransfers + explorer.calcNTransfers(edge);
                     Long firstPtDepartureTime = label.departureTime;
@@ -187,32 +190,35 @@ public class MultiCriteriaLabelSetting {
                             || (!reverse) && edgeType == GtfsStorage.EdgeType.BOARD && label.residualDelay > 0
                             || reverse && edgeType == GtfsStorage.EdgeType.ALIGHT && label.residualDelay < explorer.getDelayFromAlightEdge(edge, label.currentTime);
                     long residualDelay;
+                    long travelTimeDelay = 0;
                     if (!reverse) {
                         if (edgeType == GtfsStorage.EdgeType.WAIT || edgeType == GtfsStorage.EdgeType.TRANSFER) {
-                            residualDelay = Math.max(0, label.residualDelay - explorer.calcTravelTimeMillis(edge, label.currentTime));
+                            residualDelay = Math.max(0, label.residualDelay - explorer.calcTravelTimeMillis(edge, label.currentTime, false));
                         } else if (edgeType == GtfsStorage.EdgeType.ALIGHT) {
                             residualDelay = label.residualDelay + explorer.getDelayFromAlightEdge(edge, label.currentTime);
                         } else if (edgeType == GtfsStorage.EdgeType.BOARD) {
                             residualDelay = -explorer.getDelayFromBoardEdge(edge, label.currentTime);
                         } else {
                             residualDelay = label.residualDelay;
+                            travelTimeDelay = label.travelTime;
                         }
                     } else {
                         if (edgeType == GtfsStorage.EdgeType.WAIT || edgeType == GtfsStorage.EdgeType.TRANSFER) {
-                            residualDelay = label.residualDelay + explorer.calcTravelTimeMillis(edge, label.currentTime);
+                            residualDelay = label.residualDelay + explorer.calcTravelTimeMillis(edge, label.currentTime, false);
                         } else {
                             residualDelay = 0;
                         }
                     }
                     if (!reverse && edgeType == GtfsStorage.EdgeType.LEAVE_TIME_EXPANDED_NETWORK && residualDelay > 0) {
-                        Label newImpossibleLabelForDelayedTrip = new Label(nextTime, edge.getEdge(), edge.getAdjNode(), nTransfers, nBikeDistanceConstraintViolations, bikeDistanceOnCurrentLeg, firstPtDepartureTime, bikeTime, residualDelay, true, label);
+                        Label newImpossibleLabelForDelayedTrip = new Label(nextTime, edge.getEdge(), edge.getAdjNode(), nTransfers, nBikeDistanceConstraintViolations, bikeDistanceOnCurrentLeg, firstPtDepartureTime, bikeTime, residualDelay, true, label, travelTime);
                         insertIfNotDominated(sptEntries, newImpossibleLabelForDelayedTrip);
                         nextTime += residualDelay;
+                        travelTime += travelTimeDelay;
                         residualDelay = 0;
-                        Label newLabel = new Label(nextTime, edge.getEdge(), edge.getAdjNode(), nTransfers, nBikeDistanceConstraintViolations, bikeDistanceOnCurrentLeg, firstPtDepartureTime, bikeTime, residualDelay, impossible, label);
+                        Label newLabel = new Label(nextTime, edge.getEdge(), edge.getAdjNode(), nTransfers, nBikeDistanceConstraintViolations, bikeDistanceOnCurrentLeg, firstPtDepartureTime, bikeTime, residualDelay, impossible, label, travelTime);
                         insertIfNotDominated(sptEntries, newLabel);
                     } else {
-                        Label newLabel = new Label(nextTime, edge.getEdge(), edge.getAdjNode(), nTransfers, nBikeDistanceConstraintViolations, bikeDistanceOnCurrentLeg, firstPtDepartureTime, bikeTime, residualDelay, impossible, label);
+                        Label newLabel = new Label(nextTime, edge.getEdge(), edge.getAdjNode(), nTransfers, nBikeDistanceConstraintViolations, bikeDistanceOnCurrentLeg, firstPtDepartureTime, bikeTime, residualDelay, impossible, label, travelTime);
                         insertIfNotDominated(sptEntries, newLabel);
                     }
                 });
@@ -254,6 +260,9 @@ public class MultiCriteriaLabelSetting {
     }
 
     private boolean dominates(Label me, Label they) {
+        if(travelTimeWeight(me) > travelTimeWeight(they))
+            return false;
+
         if (weight(me) > weight(they))
             return false;
 
@@ -274,8 +283,12 @@ public class MultiCriteriaLabelSetting {
         if (me.impossible && !they.impossible)
             return false;
 
+        if(travelTimeWeight(me) < travelTimeWeight(they))
+            return true;
+
         if (weight(me) < weight(they))
             return true;
+
         if (profileQuery) {
             if (me.departureTime != null && they.departureTime != null) {
                 if (departureTimeCriterion(me) < departureTimeCriterion(they))
@@ -299,6 +312,10 @@ public class MultiCriteriaLabelSetting {
 
     long weight(Label label) {
         return (reverse ? -1 : 1) * (label.currentTime - startTime) + (long) (label.nTransfers * betaTransfers) + (long) (label.bikeTime * (betaBikeTime - 1.0));
+    }
+
+    long travelTimeWeight(Label label) {
+        return (reverse ? -1 : 1) * (label.travelTime) + (long) (label.nTransfers * betaTransfers) + (long) (label.bikeTime * (betaBikeTime - 1.0));
     }
 
     private long travelTimeCriterion(Label label) {

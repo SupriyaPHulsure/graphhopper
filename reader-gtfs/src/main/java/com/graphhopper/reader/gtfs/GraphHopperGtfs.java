@@ -205,11 +205,21 @@ public final class GraphHopperGtfs {
                 final List<Trip.Leg> legs = tripFromLabel.getTrip(translation, queryGraph, accessEgressWeighting, solution);
                 final PathWrapper pathWrapper = tripFromLabel.createPathWrapper(translation, waypoints, legs);
                 pathWrapper.setImpossible(solution.stream().anyMatch(t -> t.label.impossible));
+                if (solution.get(1).edge.edgeType != GtfsStorage.EdgeType.ENTER_PT){
+                   Label.Transition pt =  solution.stream()
+                           .skip(1)
+                            .filter(transition -> transition.edge.edgeType == GtfsStorage.EdgeType.ENTER_PT)
+                            .findAny()
+                            .orElse(null);
+                   if(pt != null){  pathWrapper.setTimewithoutInitialWait((solution.get(solution.size() - 1).label.currentTime - pt.label.currentTime)); }
+                   else{    pathWrapper.setTimewithoutInitialWait(Long.MAX_VALUE); }
+                }
+                else {  pathWrapper.setTimewithoutInitialWait((solution.get(solution.size() - 1).label.currentTime - solution.get(0).label.currentTime)); }
                 pathWrapper.setTime((solution.get(solution.size() - 1).label.currentTime - solution.get(0).label.currentTime));
                 response.add(pathWrapper);
             }
             Comparator<PathWrapper> c = Comparator.comparingInt(p -> (p.isImpossible() ? 1 : 0));
-            Comparator<PathWrapper> d = Comparator.comparingDouble(PathWrapper::getTime);
+            Comparator<PathWrapper> d = Comparator.comparingDouble(PathWrapper::getTimewithoutInitialWait);
             response.getAll().sort(c.thenComparing(d));
         }
 
@@ -261,7 +271,7 @@ public final class GraphHopperGtfs {
                 }
                 Label reverseLabel = reverseSettledSet.get(label.adjNode);
                 if (reverseLabel != null) {
-                    Label combinedSolution = new Label(label.currentTime - reverseLabel.currentTime + initialTime.toEpochMilli(), -1, label.adjNode, label.nTransfers + reverseLabel.nTransfers, label.nBikeDistanceConstraintViolations + reverseLabel.nBikeDistanceConstraintViolations, label.bikeDistanceOnCurrentLeg + reverseLabel.bikeDistanceOnCurrentLeg, label.departureTime, label.bikeTime + reverseLabel.bikeTime, 0, label.impossible, null);
+                    Label combinedSolution = new Label(label.currentTime - reverseLabel.currentTime + initialTime.toEpochMilli(), -1, label.adjNode, label.nTransfers + reverseLabel.nTransfers, label.nBikeDistanceConstraintViolations + reverseLabel.nBikeDistanceConstraintViolations, label.bikeDistanceOnCurrentLeg + reverseLabel.bikeDistanceOnCurrentLeg, label.departureTime, label.bikeTime + reverseLabel.bikeTime, 0, label.impossible, null, label.travelTime);
                     if (router.isNotDominatedByAnyOf(combinedSolution, discoveredSolutions)) {
                         router.removeDominated(combinedSolution, discoveredSolutions);
                         if (discoveredSolutions.size() < limitSolutions) {
@@ -287,7 +297,7 @@ public final class GraphHopperGtfs {
                     List<Label.Transition> pathFromStation = pathFromStation(reverseSettledSet.get(p.get(0).label.adjNode));
                     long diff = p.get(0).label.currentTime - pathFromStation.get(pathFromStation.size() - 1).label.currentTime;
                     List<Label.Transition> patchedPathFromStation = pathFromStation.stream().map(t -> {
-                        return new Label.Transition(new Label(t.label.currentTime + diff, t.label.edge, t.label.adjNode, t.label.nTransfers, t.label.nBikeDistanceConstraintViolations, t.label.bikeDistanceOnCurrentLeg, t.label.departureTime, t.label.bikeTime, t.label.residualDelay, t.label.impossible, null), t.edge);
+                        return new Label.Transition(new Label(t.label.currentTime + diff, t.label.edge, t.label.adjNode, t.label.nTransfers, t.label.nBikeDistanceConstraintViolations, t.label.bikeDistanceOnCurrentLeg, t.label.departureTime, t.label.bikeTime, t.label.residualDelay, t.label.impossible, null, t.label.travelTime), t.edge);
                     }).collect(Collectors.toList());
                     pp.addAll(0, patchedPathFromStation);
                     return pp;
@@ -296,7 +306,7 @@ public final class GraphHopperGtfs {
                     List<Label.Transition> pathFromStation = pathFromStation(reverseSettledSet.get(p.get(p.size() - 1).label.adjNode));
                     long diff = p.get(p.size() - 1).label.currentTime - pathFromStation.get(0).label.currentTime;
                     List<Label.Transition> patchedPathFromStation = pathFromStation.subList(1, pathFromStation.size()).stream().map(t -> {
-                        return new Label.Transition(new Label(t.label.currentTime + diff, t.label.edge, t.label.adjNode, t.label.nTransfers, t.label.nBikeDistanceConstraintViolations, t.label.bikeDistanceOnCurrentLeg, t.label.departureTime, t.label.bikeTime, t.label.residualDelay, t.label.impossible, null), t.edge);
+                        return new Label.Transition(new Label(t.label.currentTime + diff, t.label.edge, t.label.adjNode, t.label.nTransfers, t.label.nBikeDistanceConstraintViolations, t.label.bikeDistanceOnCurrentLeg, t.label.departureTime, t.label.bikeTime, t.label.residualDelay, t.label.impossible, null, t.label.travelTime), t.edge);
                     }).collect(Collectors.toList());
                     pp.addAll(patchedPathFromStation);
                     return pp;

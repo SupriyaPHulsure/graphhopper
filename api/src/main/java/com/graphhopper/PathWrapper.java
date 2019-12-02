@@ -39,6 +39,7 @@ public class PathWrapper {
     private double descend;
     private double routeWeight;
     private long time;
+    private long timewithoutInitialWait;
     private String debugInfo = "";
     private InstructionList instructions;
     private PointList waypointList = PointList.EMPTY;
@@ -190,6 +191,14 @@ public class PathWrapper {
     public PathWrapper setTime(long timeInMillis) {
         this.time = timeInMillis;
         return this;
+    }
+
+    public long getTimewithoutInitialWait() {
+        return timewithoutInitialWait;
+    }
+
+    public void setTimewithoutInitialWait(long timewithoutInitialWait) {
+        this.timewithoutInitialWait = timewithoutInitialWait;
     }
 
     /**

@@ -100,13 +100,13 @@ public final class GraphExplorer {
                 while (edgeIterator.next()) {
                     allEnterEdges.add(edgeIterator.detach(false));
                 }
-                return allEnterEdges.stream().min(Comparator.comparingLong(e -> calcTravelTimeMillis(e, label.currentTime))).get();
+                return allEnterEdges.stream().min(Comparator.comparingLong(e -> calcTravelTimeMillis(e, label.currentTime, false))).get();
             }
 
         }, false);
     }
 
-    long calcTravelTimeMillis(EdgeIteratorState edge, long earliestStartTime) {
+    long calcTravelTimeMillis(EdgeIteratorState edge, long earliestStartTime, boolean travelTime) {
         GtfsStorage.EdgeType edgeType = edge.get(flagEncoder.getTypeEnc());
         switch (edgeType) {
             case HIGHWAY:
@@ -115,10 +115,12 @@ public final class GraphExplorer {
                 if (reverse) {
                     return 0;
                 } else {
+                    if(travelTime) return 0;
                     return waitingTime(edge, earliestStartTime);
                 }
             case LEAVE_TIME_EXPANDED_NETWORK:
                 if (reverse) {
+                    if(travelTime) return 0;
                     return -waitingTime(edge, earliestStartTime);
                 } else {
                     return 0;
