@@ -37,6 +37,7 @@ import com.graphhopper.reader.gtfs.GraphHopperGtfs;
 import com.graphhopper.reader.gtfs.GtfsStorage;
 import com.graphhopper.reader.gtfs.PtFlagEncoder;
 import com.graphhopper.resources.*;
+import com.graphhopper.routing.util.BikeFlagEncoder;
 import com.graphhopper.routing.util.CarFlagEncoder;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.routing.util.FootFlagEncoder;
@@ -210,7 +211,7 @@ public class GraphHopperBundle implements ConfiguredBundle<GraphHopperBundleConf
         final PtFlagEncoder ptFlagEncoder = new PtFlagEncoder();
         final GHDirectory ghDirectory = GraphHopperGtfs.createGHDirectory(configuration.get("graph.location", "target/tmp"));
         final GtfsStorage gtfsStorage = GraphHopperGtfs.createGtfsStorage();
-        final EncodingManager encodingManager = new EncodingManager.Builder(configuration.getInt("graph.bytes_for_flags", 8)).add(ptFlagEncoder).add(new FootFlagEncoder()).add(new CarFlagEncoder()).build();
+        final EncodingManager encodingManager = new EncodingManager.Builder(configuration.getInt("graph.bytes_for_flags", 8)).add(ptFlagEncoder).add(new BikeFlagEncoder()).add(new CarFlagEncoder()).build();
         final GraphHopperStorage graphHopperStorage = GraphHopperGtfs.createOrLoad(ghDirectory, encodingManager, ptFlagEncoder, gtfsStorage,
                 configuration.has("gtfs.file") ? Arrays.asList(configuration.get("gtfs.file", "").split(",")) : Collections.emptyList(),
                 configuration.has("datareader.file") ? Arrays.asList(configuration.get("datareader.file", "").split(",")) : Collections.emptyList());
@@ -241,7 +242,7 @@ public class GraphHopperBundle implements ConfiguredBundle<GraphHopperBundleConf
                 InfoResource.Info info = (InfoResource.Info) context.getEntity();
                 info.supported_vehicles = new String[]{"pt"};
                 info.features.remove("car");
-                info.features.remove("foot");
+                info.features.remove("bike");
                 context.setEntity(info);
             }
             context.proceed();

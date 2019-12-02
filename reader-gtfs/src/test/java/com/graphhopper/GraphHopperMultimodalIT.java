@@ -96,7 +96,7 @@ public class GraphHopperMultimodalIT {
                 36.91260259593356, -116.76149368286134
         );
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007, 1, 1, 6, 40, 0).atZone(zoneId).toInstant());
-        ghRequest.setBetaWalkTime(2.0); // I somewhat dislike walking
+        ghRequest.setBetaBikeTime(2.0); // I somewhat dislike walking
 
         GHResponse response = graphHopper.route(ghRequest);
         assertThat(response.getHints().getInt("visited_nodes.sum", Integer.MAX_VALUE)).isLessThanOrEqualTo(129);
@@ -121,7 +121,7 @@ public class GraphHopperMultimodalIT {
 
         // I like walking exactly as I like riding a bus (per travel time unit)
         // Now, the walk solution dominates, and we get no transit solution.
-        ghRequest.setBetaWalkTime(1.0);
+        ghRequest.setBetaBikeTime(1.0);
         response = graphHopper.route(ghRequest);
         assertThat(response.getHints().getInt("visited_nodes.sum", Integer.MAX_VALUE)).isLessThanOrEqualTo(138);
         assertThat(response.getAll().stream().filter(p -> p.getLegs().size() > 1).findFirst()).isEmpty();
@@ -134,7 +134,7 @@ public class GraphHopperMultimodalIT {
                 36.91260259593356, -116.76149368286134
         );
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007, 1, 1, 6, 40, 0).atZone(zoneId).toInstant());
-        ghRequest.setWalkSpeedKmH(50); // Yes, I can walk very fast, 50 km/h. Problem?
+        ghRequest.setBikeSpeedKmH(50); // Yes, I can walk very fast, 50 km/h. Problem?
 
         GHResponse response = graphHopper.route(ghRequest);
 
@@ -154,7 +154,7 @@ public class GraphHopperMultimodalIT {
                 36.91260259593356, -116.76149368286134
         );
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007, 1, 1, 6, 40, 0).atZone(zoneId).toInstant());
-        ghRequest.setWalkSpeedKmH(50); // Yes, I can walk very fast, 50 km/h. Problem?
+        ghRequest.setBikeSpeedKmH(50); // Yes, I can walk very fast, 50 km/h. Problem?
         ghRequest.setProfileQuery(true);
 
         GHResponse response = graphHopper.route(ghRequest);
@@ -177,7 +177,7 @@ public class GraphHopperMultimodalIT {
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007, 1, 1, 6, 40, 0).atZone(zoneId).toInstant());
         // Provoke a situation where solutions which are later dominated will be found early.
         // If everything is right, the n-th solution should be the same, no matter if I ask for n, or for n+m solutions.
-        ghRequest.setWalkSpeedKmH(1); // No, I cannot walk very fast, 1 km/h. Problem?
+        ghRequest.setBikeSpeedKmH(1); // No, I cannot walk very fast, 1 km/h. Problem?
         ghRequest.setProfileQuery(true);
 
         ghRequest.setLimitSolutions(1);
@@ -200,8 +200,8 @@ public class GraphHopperMultimodalIT {
                 36.91260259593356, -116.76149368286134
         );
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007, 1, 1, 6, 40, 0).atZone(zoneId).toInstant());
-        ghRequest.setWalkSpeedKmH(50); // Yes, I can walk very fast, 50 km/h. Problem?
-        ghRequest.setBetaWalkTime(20); // But I dislike walking a lot.
+        ghRequest.setBikeSpeedKmH(50); // Yes, I can walk very fast, 50 km/h. Problem?
+        ghRequest.setBetaBikeTime(20); // But I dislike walking a lot.
 
         GHResponse response = graphHopper.route(ghRequest);
 

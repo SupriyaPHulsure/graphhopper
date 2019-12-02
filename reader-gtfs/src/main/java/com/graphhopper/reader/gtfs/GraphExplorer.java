@@ -43,11 +43,11 @@ public final class GraphExplorer {
     private final RealtimeFeed realtimeFeed;
     private final boolean reverse;
     private final Weighting accessEgressWeighting;
-    private final boolean walkOnly;
-    private double walkSpeedKmH;
+    private final boolean bikeOnly;
+    private double bikeSpeedKmH;
 
 
-    public GraphExplorer(Graph graph, Weighting accessEgressWeighting, PtFlagEncoder flagEncoder, GtfsStorage gtfsStorage, RealtimeFeed realtimeFeed, boolean reverse, boolean walkOnly, double walkSpeedKmh) {
+    public GraphExplorer(Graph graph, Weighting accessEgressWeighting, PtFlagEncoder flagEncoder, GtfsStorage gtfsStorage, RealtimeFeed realtimeFeed, boolean reverse, boolean bikeOnly, double bikeSpeedKmh) {
         this.accessEgressWeighting = accessEgressWeighting;
         DefaultEdgeFilter accessEgressIn = DefaultEdgeFilter.inEdges(accessEgressWeighting.getFlagEncoder());
         DefaultEdgeFilter accessEgressOut = DefaultEdgeFilter.outEdges(accessEgressWeighting.getFlagEncoder());
@@ -60,8 +60,8 @@ public final class GraphExplorer {
         this.gtfsStorage = gtfsStorage;
         this.realtimeFeed = realtimeFeed;
         this.reverse = reverse;
-        this.walkOnly = walkOnly;
-        this.walkSpeedKmH = walkSpeedKmh;
+        this.bikeOnly = bikeOnly;
+        this.bikeSpeedKmH = bikeSpeedKmh;
     }
 
     Stream<EdgeIteratorState> exploreEdgesAround(Label label) {
@@ -110,7 +110,7 @@ public final class GraphExplorer {
         GtfsStorage.EdgeType edgeType = edge.get(flagEncoder.getTypeEnc());
         switch (edgeType) {
             case HIGHWAY:
-                return (long) (accessEgressWeighting.calcMillis(edge, reverse, -1) * (5.0 / walkSpeedKmH));
+                return (long) (accessEgressWeighting.calcMillis(edge, reverse, -1) * (12.0 / bikeSpeedKmH));
             case ENTER_TIME_EXPANDED_NETWORK:
                 if (reverse) {
                     return 0;
@@ -190,7 +190,7 @@ public final class GraphExplorer {
                     return edgeIterator.get(accessEgressWeighting.getFlagEncoder().getAccessEnc());
                 }
             }
-            if (walkOnly && edgeType != (reverse ? GtfsStorage.EdgeType.EXIT_PT : GtfsStorage.EdgeType.ENTER_PT)) {
+            if (bikeOnly && edgeType != (reverse ? GtfsStorage.EdgeType.EXIT_PT : GtfsStorage.EdgeType.ENTER_PT)) {
                 return false;
             }
             if (!isValidOn(edgeIterator, label.currentTime)) {

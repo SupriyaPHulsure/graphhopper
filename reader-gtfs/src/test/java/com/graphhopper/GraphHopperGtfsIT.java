@@ -338,7 +338,7 @@ public class GraphHopperGtfsIT {
                 TO_LAT, TO_LON
         );
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007, 1, 1, 10, 1).atZone(zoneId).toInstant());
-        ghRequest.setMaxWalkDistancePerLeg(30);
+        ghRequest.setMaxBikeDistancePerLeg(30);
         GHResponse route = graphHopper.route(ghRequest);
 
         assertFalse(route.hasErrors());
@@ -464,7 +464,7 @@ public class GraphHopperGtfsIT {
                 TO_LAT, TO_LON
         );
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007, 1, 1, 0, 0).atZone(zoneId).toInstant());
-        ghRequest.setMaxWalkDistancePerLeg(30);
+        ghRequest.setMaxBikeDistancePerLeg(30);
         GHResponse route = graphHopper.route(ghRequest);
 
         assertFalse(route.hasErrors());
@@ -478,7 +478,7 @@ public class GraphHopperGtfsIT {
                 to_lat, to_lon
         );
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007, 1, 1, 0, 0).atZone(zoneId).toInstant());
-        ghRequest.setMaxWalkDistancePerLeg(30);
+        ghRequest.setMaxBikeDistancePerLeg(30);
 
         GHResponse route = graphHopper.route(ghRequest);
         assertTrue(route.getAll().isEmpty());

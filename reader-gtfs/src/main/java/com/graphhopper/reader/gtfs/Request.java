@@ -32,14 +32,14 @@ public class Request {
     private int maxVisitedNodes = 1_000_000;
     private boolean profileQuery;
     private Boolean ignoreTransfers;
-    private double betaTransfers = 0.0;
-    private double betaWalkTime = 1.0;
+    private double betaTransfers = 2.0;
+    private double betaBikeTime = 10.0;
     private Integer limitSolutions;
     private boolean arriveBy;
-    private double walkSpeedKmH = 5.0;
+    private double bikeSpeedKmH = 12.0;
     private int blockedRouteTypes;
     private Locale locale = Helper.getLocale("en");
-    private double maxWalkDistancePerLeg = Integer.MAX_VALUE;
+    private double maxBikeDistancePerLeg = Integer.MAX_VALUE;
 
     public Request(List<GHLocation> points, Instant departureTime) {
         this.points = points;
@@ -82,12 +82,12 @@ public class Request {
         this.betaTransfers = betaTransfers;
     }
 
-    public double getBetaWalkTime() {
-        return betaWalkTime;
+    public double getBetaBikeTime() {
+        return betaBikeTime;
     }
 
-    public void setBetaWalkTime(double betaWalkTime) {
-        this.betaWalkTime = betaWalkTime;
+    public void setBetaBikeTime(double betaBikeTime) {
+        this.betaBikeTime = betaBikeTime;
     }
 
     public Integer getLimitSolutions() {
@@ -114,12 +114,12 @@ public class Request {
         this.arriveBy = arriveBy;
     }
 
-    public double getWalkSpeedKmH() {
-        return walkSpeedKmH;
+    public double getBikeSpeedKmH() {
+        return bikeSpeedKmH;
     }
 
-    public void setWalkSpeedKmH(double walkSpeedKmH) {
-        this.walkSpeedKmH = walkSpeedKmH;
+    public void setBikeSpeedKmH(double bikeSpeedKmH) {
+        this.bikeSpeedKmH = bikeSpeedKmH;
     }
 
     public int getBlockedRouteTypes() {
@@ -142,11 +142,11 @@ public class Request {
         return points;
     }
 
-    public double getMaxWalkDistancePerLeg() {
-        return maxWalkDistancePerLeg;
+    public double getMaxBikeDistancePerLeg() {
+        return maxBikeDistancePerLeg;
     }
 
-    public void setMaxWalkDistancePerLeg(double maxWalkDistancePerLeg) {
-        this.maxWalkDistancePerLeg = maxWalkDistancePerLeg;
+    public void setMaxBikeDistancePerLeg(double maxBikeDistancePerLeg) {
+        this.maxBikeDistancePerLeg = maxBikeDistancePerLeg;
     }
 }

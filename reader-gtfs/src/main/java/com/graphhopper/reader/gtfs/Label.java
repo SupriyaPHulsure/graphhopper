@@ -68,11 +68,11 @@ public class Label {
     public final int adjNode;
 
     public final int nTransfers;
-    public final int nWalkDistanceConstraintViolations;
+    public final int nBikeDistanceConstraintViolations;
 
-    public final double walkDistanceOnCurrentLeg;
+    public final double bikeDistanceOnCurrentLeg;
     public final Long departureTime;
-    public final long walkTime;
+    public final long bikeTime;
 
     final long residualDelay;
     final boolean impossible;
@@ -80,15 +80,15 @@ public class Label {
     public final Label parent;
     public boolean deleted = false;
 
-    Label(long currentTime, int edgeId, int adjNode, int nTransfers, int nWalkDistanceConstraintViolations, double walkDistance, Long departureTime, long walkTime, long residualDelay, boolean impossible, Label parent) {
+    Label(long currentTime, int edgeId, int adjNode, int nTransfers, int nBikeDistanceConstraintViolations, double bikeDistance, Long departureTime, long bikeTime, long residualDelay, boolean impossible, Label parent) {
         this.currentTime = currentTime;
         this.edge = edgeId;
         this.adjNode = adjNode;
         this.nTransfers = nTransfers;
-        this.nWalkDistanceConstraintViolations = nWalkDistanceConstraintViolations;
-        this.walkDistanceOnCurrentLeg = walkDistance;
+        this.nBikeDistanceConstraintViolations = nBikeDistanceConstraintViolations;
+        this.bikeDistanceOnCurrentLeg = bikeDistance;
         this.departureTime = departureTime;
-        this.walkTime = walkTime;
+        this.bikeTime = bikeTime;
         this.residualDelay = residualDelay;
         this.impossible = impossible;
         this.parent = parent;
@@ -96,7 +96,7 @@ public class Label {
 
     @Override
     public String toString() {
-        return adjNode + " " + Instant.ofEpochMilli(currentTime) + " " + nTransfers + " " + nWalkDistanceConstraintViolations + " " +  (departureTime != null ? Instant.ofEpochMilli(departureTime) : "");
+        return adjNode + " " + Instant.ofEpochMilli(currentTime) + " " + nTransfers + " " + nBikeDistanceConstraintViolations + " " +  (departureTime != null ? Instant.ofEpochMilli(departureTime) : "");
     }
 
     static Iterable<Transition> reverseEdges(Label leaf, Graph graph, PtFlagEncoder flagEncoder, boolean reverseEdgeFlags) {

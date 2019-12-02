@@ -91,7 +91,7 @@ public class RealtimeIT {
 
         // I want to go at 6:44
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007,1,1,6,44).atZone(zoneId).toInstant());
-        ghRequest.setMaxWalkDistancePerLeg(30);
+        ghRequest.setMaxBikeDistancePerLeg(30);
 
         // But the 6:00 departure of my line is going to skip my departure stop :-(
         final GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
@@ -128,7 +128,7 @@ public class RealtimeIT {
 
         // I want to go at 6:44
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007,1,1,6,44).atZone(zoneId).toInstant());
-        ghRequest.setMaxWalkDistancePerLeg(30);
+        ghRequest.setMaxBikeDistancePerLeg(30);
 
         // But the 6:00 departure of my line is going to be super-late :-(
         final GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
@@ -170,7 +170,7 @@ public class RealtimeIT {
 
         // I want to go at 6:44
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007,1,1,6,46).atZone(zoneId).toInstant());
-        ghRequest.setMaxWalkDistancePerLeg(30);
+        ghRequest.setMaxBikeDistancePerLeg(30);
 
         // But the 6:00 departure of my line is going to be super-late :-(
         final GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
@@ -202,7 +202,7 @@ public class RealtimeIT {
 
         // I want to go at 6:44
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007,1,1,6,44).atZone(zoneId).toInstant());
-        ghRequest.setMaxWalkDistancePerLeg(30);
+        ghRequest.setMaxBikeDistancePerLeg(30);
 
         // But the 6:00 departure of my line is going to skip my arrival stop :-(
         final GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
@@ -238,7 +238,7 @@ public class RealtimeIT {
 
         // I want to go at 6:44
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007,1,1,6,44).atZone(zoneId).toInstant());
-        ghRequest.setMaxWalkDistancePerLeg(30);
+        ghRequest.setMaxBikeDistancePerLeg(30);
 
         // But the 6:00 departure of my line is going to skip my transfer stop :-(
         final GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
@@ -275,7 +275,7 @@ public class RealtimeIT {
         // I want to go at 6:44
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007,1,1,6,44).atZone(zoneId).toInstant());
         ghRequest.setIgnoreTransfers(true);
-        ghRequest.setMaxWalkDistancePerLeg(30);
+        ghRequest.setMaxBikeDistancePerLeg(30);
 
         // But the 6:00 departure of my line is going to skip my transfer stop :-(
         final GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
@@ -335,7 +335,7 @@ public class RealtimeIT {
         // I want to go at 6:45, but tomorrow
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007,1,2,6,45).atZone(zoneId).toInstant());
         ghRequest.setIgnoreTransfers(true);
-        ghRequest.setMaxWalkDistancePerLeg(30);
+        ghRequest.setMaxBikeDistancePerLeg(30);
 
         final GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
         feedMessageBuilder.setHeader(GtfsRealtime.FeedHeader.newBuilder()
@@ -379,7 +379,7 @@ public class RealtimeIT {
         // I want to go at 6:44
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007,1,1,6,44).atZone(zoneId).toInstant());
         ghRequest.setIgnoreTransfers(true);
-        ghRequest.setMaxWalkDistancePerLeg(30);
+        ghRequest.setMaxBikeDistancePerLeg(30);
 
         GHResponse responseWithoutRealtimeUpdate = graphHopperFactory.createWithoutRealtimeFeed().route(ghRequest);
 
@@ -420,7 +420,7 @@ public class RealtimeIT {
         Instant initialTime = LocalDateTime.of(2007, 1, 1, 6, 44).atZone(zoneId).toInstant();
         ghRequest.setEarliestDepartureTime(initialTime);
         ghRequest.setIgnoreTransfers(true);
-        ghRequest.setMaxWalkDistancePerLeg(30);
+        ghRequest.setMaxBikeDistancePerLeg(30);
 
         // The 6:00 departure of my line is going to be late by 3 minutes
         final GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
@@ -454,7 +454,7 @@ public class RealtimeIT {
         Instant initialTime = LocalDateTime.of(2007, 1, 1, 6, 44).atZone(zoneId).toInstant();
         ghRequest.setEarliestDepartureTime(initialTime);
         ghRequest.setIgnoreTransfers(true);
-        ghRequest.setMaxWalkDistancePerLeg(30);
+        ghRequest.setMaxBikeDistancePerLeg(30);
 
         // The 6:00 departure of my line is going to be "late" by 0 minutes
         final GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
@@ -488,7 +488,7 @@ public class RealtimeIT {
         );
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007,1,1,8,0).atZone(zoneId).toInstant());
         ghRequest.setIgnoreTransfers(true);
-        ghRequest.setMaxWalkDistancePerLeg(30);
+        ghRequest.setMaxBikeDistancePerLeg(30);
 
         // My line does not stop at Bullfrog today. If this was a real transfer, I would not be
         // able to change lines there. But it is not a real transfer, so I can go on as planned.
@@ -552,7 +552,7 @@ public class RealtimeIT {
 
         // I want to go at 6:44
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007,1,1,6,44).atZone(zoneId).toInstant());
-        ghRequest.setMaxWalkDistancePerLeg(30);
+        ghRequest.setMaxBikeDistancePerLeg(30);
 
         // But the 6:00 departure of my line is going to be 5 minutes late at my transfer stop :-(
         final GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
@@ -588,7 +588,7 @@ public class RealtimeIT {
 
         // I want to go at 6:44
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007,1,1,6,44).atZone(zoneId).toInstant());
-        ghRequest.setMaxWalkDistancePerLeg(30);
+        ghRequest.setMaxBikeDistancePerLeg(30);
 
         // But the 6:00 departure of my line is going to be 5 minutes late at my transfer stop :-(
         final GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
@@ -636,7 +636,7 @@ public class RealtimeIT {
 
         // I want to go at 6:44
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007,1,1,6,44).atZone(zoneId).toInstant());
-        ghRequest.setMaxWalkDistancePerLeg(30);
+        ghRequest.setMaxBikeDistancePerLeg(30);
 
         // But the 6:00 departure of my line is going to be 5 minutes late at my transfer stop :-(
         final GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
@@ -687,7 +687,7 @@ public class RealtimeIT {
         // I want to be there at 7:20
         ghRequest.setEarliestDepartureTime(LocalDateTime.of(2007,1,1,8,20).atZone(zoneId).toInstant());
         ghRequest.setArriveBy(true);
-        ghRequest.setMaxWalkDistancePerLeg(30);
+        ghRequest.setMaxBikeDistancePerLeg(30);
 
         // But the 6:00 departure of my line is going to skip my transfer stop :-(
         final GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();

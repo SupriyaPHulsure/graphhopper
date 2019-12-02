@@ -73,7 +73,7 @@ class GtfsReader {
     private static final Logger LOGGER = LoggerFactory.getLogger(GtfsReader.class);
 
     private final Graph graph;
-    private final LocationIndex walkNetworkIndex;
+    private final LocationIndex bikeNetworkIndex;
     private final GtfsStorageI gtfsStorage;
 
     private final DistanceCalc distCalc = Helper.DIST_EARTH;
@@ -89,12 +89,12 @@ class GtfsReader {
     private final IntEncodedValue timeEnc;
     private final IntEncodedValue validityIdEnc;
 
-    GtfsReader(String id, Graph graph, GtfsStorageI gtfsStorage, PtFlagEncoder encoder, LocationIndex walkNetworkIndex) {
+    GtfsReader(String id, Graph graph, GtfsStorageI gtfsStorage, PtFlagEncoder encoder, LocationIndex bikeNetworkIndex) {
         this.id = id;
         this.graph = graph;
         this.gtfsStorage = gtfsStorage;
         this.nodeAccess = graph.getNodeAccess();
-        this.walkNetworkIndex = walkNetworkIndex;
+        this.bikeNetworkIndex = bikeNetworkIndex;
         this.encoder = encoder;
         this.accessEnc = encoder.getAccessEnc();
         this.timeEnc = encoder.getTimeEnc();
@@ -107,11 +107,11 @@ class GtfsReader {
     }
 
     void connectStopsToStreetNetwork() {
-        FlagEncoder footEncoder = ((GraphHopperStorage) graph).getEncodingManager().getEncoder("foot");
+        FlagEncoder footEncoder = ((GraphHopperStorage) graph).getEncodingManager().getEncoder("bike");
         final EdgeFilter filter = DefaultEdgeFilter.allEdges(footEncoder);
         for (Stop stop : feed.stops.values()) {
             if (stop.location_type == 0) { // Only stops. Not interested in parent stations for now.
-                QueryResult locationQueryResult = walkNetworkIndex.findClosest(stop.stop_lat, stop.stop_lon, filter);
+                QueryResult locationQueryResult = bikeNetworkIndex.findClosest(stop.stop_lat, stop.stop_lon, filter);
                 int streetNode;
                 if (!locationQueryResult.isValid()) {
                     streetNode = i++;
@@ -119,7 +119,7 @@ class GtfsReader {
                     EdgeIteratorState edge = graph.edge(streetNode, streetNode);
                     edge.set(accessEnc, true).setReverse(accessEnc, false);
                     edge.set(footEncoder.getAccessEnc(), true).setReverse(footEncoder.getAccessEnc(), false);
-                    edge.set(footEncoder.getAverageSpeedEnc(), 5.0);
+                    edge.set(footEncoder.getAverageSpeedEnc(), 12.0);
                 } else {
                     streetNode = locationQueryResult.getClosestNode();
                 }

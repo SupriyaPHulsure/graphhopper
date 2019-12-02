@@ -53,21 +53,21 @@ public class MultiCriteriaLabelSetting {
     private final PriorityQueue<Label> fromHeap;
     private final int maxVisitedNodes;
     private final boolean reverse;
-    private final double maxWalkDistancePerLeg;
+    private final double maxBikeDistancePerLeg;
     private final boolean ptOnly;
     private final boolean mindTransfers;
     private final boolean profileQuery;
     private int visitedNodes;
     private final GraphExplorer explorer;
     private double betaTransfers;
-    private double betaWalkTime = 1.0;
+    private double betaBikeTime = 1.0;
 
-    public MultiCriteriaLabelSetting(GraphExplorer explorer, PtFlagEncoder flagEncoder, boolean reverse, double maxWalkDistancePerLeg, boolean ptOnly, boolean mindTransfers, boolean profileQuery, int maxVisitedNodes, List<Label> solutions) {
+    public MultiCriteriaLabelSetting(GraphExplorer explorer, PtFlagEncoder flagEncoder, boolean reverse, double maxBikeDistancePerLeg, boolean ptOnly, boolean mindTransfers, boolean profileQuery, int maxVisitedNodes, List<Label> solutions) {
         this.flagEncoder = flagEncoder;
         this.maxVisitedNodes = maxVisitedNodes;
         this.explorer = explorer;
         this.reverse = reverse;
-        this.maxWalkDistancePerLeg = maxWalkDistancePerLeg;
+        this.maxBikeDistancePerLeg = maxBikeDistancePerLeg;
         this.ptOnly = ptOnly;
         this.mindTransfers = mindTransfers;
         this.profileQuery = profileQuery;
@@ -76,7 +76,7 @@ public class MultiCriteriaLabelSetting {
         queueComparator = Comparator
                 .comparingLong(this::weight)
                 .thenComparingLong(l -> l.nTransfers)
-                .thenComparingLong(l -> l.walkTime)
+                .thenComparingLong(l -> l.bikeTime)
                 .thenComparingLong(l -> departureTimeCriterion(l) != null ? departureTimeCriterion(l) : 0)
                 .thenComparingLong(l -> l.impossible ? 1 : 0);
         fromHeap = new PriorityQueue<>(queueComparator);
@@ -121,8 +121,8 @@ public class MultiCriteriaLabelSetting {
     }
 
     // experimental
-    void setBetaWalkTime(double betaWalkTime) {
-        this.betaWalkTime = betaWalkTime;
+    void setBetaBikeTime(double betaBikeTime) {
+        this.betaBikeTime = betaBikeTime;
     }
 
     private class MultiCriteriaLabelSettingSpliterator extends Spliterators.AbstractSpliterator<Label> {
@@ -165,18 +165,18 @@ public class MultiCriteriaLabelSetting {
                     Long firstPtDepartureTime = label.departureTime;
                     if (!reverse && (edgeType == GtfsStorage.EdgeType.ENTER_TIME_EXPANDED_NETWORK || edgeType == GtfsStorage.EdgeType.WAIT)) {
                         if (label.nTransfers == 0) {
-                            firstPtDepartureTime = nextTime - label.walkTime;
+                            firstPtDepartureTime = nextTime - label.bikeTime;
                         }
                     } else if (reverse && (edgeType == GtfsStorage.EdgeType.LEAVE_TIME_EXPANDED_NETWORK || edgeType == GtfsStorage.EdgeType.WAIT_ARRIVAL)) {
                         if (label.nTransfers == 0) {
-                            firstPtDepartureTime = nextTime - label.walkTime;
+                            firstPtDepartureTime = nextTime - label.bikeTime;
                         }
                     }
-                    double walkDistanceOnCurrentLeg = (!reverse && edgeType == GtfsStorage.EdgeType.BOARD || reverse && edgeType == GtfsStorage.EdgeType.ALIGHT) ? 0 : (label.walkDistanceOnCurrentLeg + edge.getDistance());
-                    boolean isTryingToReEnterPtAfterWalking = (!reverse && edgeType == GtfsStorage.EdgeType.ENTER_PT || reverse && edgeType == GtfsStorage.EdgeType.EXIT_PT) && label.nTransfers > 0;
-                    long walkTime = label.walkTime + (edgeType == GtfsStorage.EdgeType.HIGHWAY || edgeType == GtfsStorage.EdgeType.ENTER_PT || edgeType == GtfsStorage.EdgeType.EXIT_PT ? ((reverse ? -1 : 1) * (nextTime - label.currentTime)) : 0);
-                    int nWalkDistanceConstraintViolations = Math.min(1, label.nWalkDistanceConstraintViolations + (
-                            isTryingToReEnterPtAfterWalking ? 1 : (label.walkDistanceOnCurrentLeg <= maxWalkDistancePerLeg && walkDistanceOnCurrentLeg > maxWalkDistancePerLeg ? 1 : 0)));
+                    double bikeDistanceOnCurrentLeg = (!reverse && edgeType == GtfsStorage.EdgeType.BOARD || reverse && edgeType == GtfsStorage.EdgeType.ALIGHT) ? 0 : (label.bikeDistanceOnCurrentLeg + edge.getDistance());
+                    boolean isTryingToReEnterPtAfterBiking = (!reverse && edgeType == GtfsStorage.EdgeType.ENTER_PT || reverse && edgeType == GtfsStorage.EdgeType.EXIT_PT) && label.nTransfers > 0;
+                    long bikeTime = label.bikeTime + (edgeType == GtfsStorage.EdgeType.HIGHWAY || edgeType == GtfsStorage.EdgeType.ENTER_PT || edgeType == GtfsStorage.EdgeType.EXIT_PT ? ((reverse ? -1 : 1) * (nextTime - label.currentTime)) : 0);
+                    int nBikeDistanceConstraintViolations = Math.min(1, label.nBikeDistanceConstraintViolations + (
+                            isTryingToReEnterPtAfterBiking ? 1 : (label.bikeDistanceOnCurrentLeg <= maxBikeDistancePerLeg && bikeDistanceOnCurrentLeg > maxBikeDistancePerLeg ? 1 : 0)));
                     List<Label> sptEntries = fromMap.get(edge.getAdjNode());
                     if (sptEntries == null) {
                         sptEntries = new ArrayList<>(1);
@@ -205,14 +205,14 @@ public class MultiCriteriaLabelSetting {
                         }
                     }
                     if (!reverse && edgeType == GtfsStorage.EdgeType.LEAVE_TIME_EXPANDED_NETWORK && residualDelay > 0) {
-                        Label newImpossibleLabelForDelayedTrip = new Label(nextTime, edge.getEdge(), edge.getAdjNode(), nTransfers, nWalkDistanceConstraintViolations, walkDistanceOnCurrentLeg, firstPtDepartureTime, walkTime, residualDelay, true, label);
+                        Label newImpossibleLabelForDelayedTrip = new Label(nextTime, edge.getEdge(), edge.getAdjNode(), nTransfers, nBikeDistanceConstraintViolations, bikeDistanceOnCurrentLeg, firstPtDepartureTime, bikeTime, residualDelay, true, label);
                         insertIfNotDominated(sptEntries, newImpossibleLabelForDelayedTrip);
                         nextTime += residualDelay;
                         residualDelay = 0;
-                        Label newLabel = new Label(nextTime, edge.getEdge(), edge.getAdjNode(), nTransfers, nWalkDistanceConstraintViolations, walkDistanceOnCurrentLeg, firstPtDepartureTime, walkTime, residualDelay, impossible, label);
+                        Label newLabel = new Label(nextTime, edge.getEdge(), edge.getAdjNode(), nTransfers, nBikeDistanceConstraintViolations, bikeDistanceOnCurrentLeg, firstPtDepartureTime, bikeTime, residualDelay, impossible, label);
                         insertIfNotDominated(sptEntries, newLabel);
                     } else {
-                        Label newLabel = new Label(nextTime, edge.getEdge(), edge.getAdjNode(), nTransfers, nWalkDistanceConstraintViolations, walkDistanceOnCurrentLeg, firstPtDepartureTime, walkTime, residualDelay, impossible, label);
+                        Label newLabel = new Label(nextTime, edge.getEdge(), edge.getAdjNode(), nTransfers, nBikeDistanceConstraintViolations, bikeDistanceOnCurrentLeg, firstPtDepartureTime, bikeTime, residualDelay, impossible, label);
                         insertIfNotDominated(sptEntries, newLabel);
                     }
                 });
@@ -232,7 +232,7 @@ public class MultiCriteriaLabelSetting {
     }
 
     boolean isNotDominatedByAnyOf(Label me, Collection<Label> sptEntries) {
-        if (me.nWalkDistanceConstraintViolations > 0) {
+        if (me.nBikeDistanceConstraintViolations > 0) {
             return false;
         }
         for (Label they : sptEntries) {
@@ -269,7 +269,7 @@ public class MultiCriteriaLabelSetting {
 
         if (mindTransfers && me.nTransfers > they.nTransfers)
             return false;
-        if (me.nWalkDistanceConstraintViolations > they.nWalkDistanceConstraintViolations)
+        if (me.nBikeDistanceConstraintViolations > they.nBikeDistanceConstraintViolations)
             return false;
         if (me.impossible && !they.impossible)
             return false;
@@ -287,7 +287,7 @@ public class MultiCriteriaLabelSetting {
         }
         if (mindTransfers && me.nTransfers < they.nTransfers)
             return true;
-        if (me.nWalkDistanceConstraintViolations < they.nWalkDistanceConstraintViolations)
+        if (me.nBikeDistanceConstraintViolations < they.nBikeDistanceConstraintViolations)
             return true;
 
         return queueComparator.compare(me, they) <= 0;
@@ -298,12 +298,12 @@ public class MultiCriteriaLabelSetting {
     }
 
     long weight(Label label) {
-        return (reverse ? -1 : 1) * (label.currentTime - startTime) + (long) (label.nTransfers * betaTransfers) + (long) (label.walkTime * (betaWalkTime - 1.0));
+        return (reverse ? -1 : 1) * (label.currentTime - startTime) + (long) (label.nTransfers * betaTransfers) + (long) (label.bikeTime * (betaBikeTime - 1.0));
     }
 
     private long travelTimeCriterion(Label label) {
         if (label.departureTime == null) {
-            return label.walkTime;
+            return label.bikeTime;
         } else {
             return (reverse ? -1 : 1) * (label.currentTime - label.departureTime);
         }
