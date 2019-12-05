@@ -205,21 +205,21 @@ public final class GraphHopperGtfs {
                 final List<Trip.Leg> legs = tripFromLabel.getTrip(translation, queryGraph, accessEgressWeighting, solution);
                 final PathWrapper pathWrapper = tripFromLabel.createPathWrapper(translation, waypoints, legs);
                 pathWrapper.setImpossible(solution.stream().anyMatch(t -> t.label.impossible));
-                if (solution.get(1).edge.edgeType != GtfsStorage.EdgeType.ENTER_PT){
-                   Label.Transition pt =  solution.stream()
-                           .skip(1)
-                            .filter(transition -> transition.edge.edgeType == GtfsStorage.EdgeType.ENTER_PT)
-                            .findAny()
-                            .orElse(null);
-                   if(pt != null){  pathWrapper.setTimewithoutInitialWait((solution.get(solution.size() - 1).label.currentTime - pt.label.currentTime)); }
-                   else{    pathWrapper.setTimewithoutInitialWait(Long.MAX_VALUE); }
-                }
-                else {  pathWrapper.setTimewithoutInitialWait((solution.get(solution.size() - 1).label.currentTime - solution.get(0).label.currentTime)); }
+//                if (solution.get(1).edge.edgeType != GtfsStorage.EdgeType.ENTER_PT){
+//                   Label.Transition pt =  solution.stream()
+//                           .skip(1)
+//                            .filter(transition -> transition.edge.edgeType == GtfsStorage.EdgeType.ENTER_PT)
+//                            .findAny()
+//                            .orElse(null);
+//                   if(pt != null){  pathWrapper.setTimewithoutInitialWait((solution.get(solution.size() - 1).label.currentTime - pt.label.currentTime)); }
+//                   else{    pathWrapper.setTimewithoutInitialWait(Long.MAX_VALUE); }
+//                }
+//                else {  pathWrapper.setTimewithoutInitialWait((solution.get(solution.size() - 1).label.currentTime - solution.get(0).label.currentTime)); }
                 pathWrapper.setTime((solution.get(solution.size() - 1).label.currentTime - solution.get(0).label.currentTime));
                 response.add(pathWrapper);
             }
             Comparator<PathWrapper> c = Comparator.comparingInt(p -> (p.isImpossible() ? 1 : 0));
-            Comparator<PathWrapper> d = Comparator.comparingDouble(PathWrapper::getTimewithoutInitialWait);
+            Comparator<PathWrapper> d = Comparator.comparingDouble(PathWrapper::getTime);
             response.getAll().sort(c.thenComparing(d));
         }
 
