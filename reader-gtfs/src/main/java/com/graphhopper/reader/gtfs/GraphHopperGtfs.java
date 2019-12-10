@@ -73,6 +73,7 @@ public final class GraphHopperGtfs {
             this.gtfsStorage = gtfsStorage;
         }
 
+
         public GraphHopperGtfs createWith(GtfsRealtime.FeedMessage realtimeFeed) {
             Map<String, GtfsRealtime.FeedMessage> realtimeFeeds = new HashMap<>();
             realtimeFeeds.put("gtfs_0", realtimeFeed);
@@ -348,7 +349,20 @@ public final class GraphHopperGtfs {
     }
 
     public static GHDirectory createGHDirectory(String graphHopperFolder) {
+        deleteFolder();
         return new GHDirectory(graphHopperFolder, DAType.RAM_STORE);
+    }
+
+    public static void deleteFolder() {
+        File graph_cache  = new File("./graph-cache");
+        if (graph_cache.exists()) {
+            String[] entries = graph_cache.list();
+            for (String s : entries) {
+                File currentFile = new File(graph_cache.getPath(), s);
+                currentFile.delete();
+            }
+            graph_cache.delete();
+        }
     }
 
     public static TranslationMap createTranslationMap() {

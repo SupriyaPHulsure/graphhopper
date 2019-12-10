@@ -87,6 +87,29 @@ $(document).ready(function (e) {
         });
     }
 
+    /////
+
+    var marker = L.marker([40.440468,-79.998464])
+        .bindTooltip("Test Label 1",
+            {
+                permanent: true,
+                direction: 'right'
+            }
+        );
+
+    marker.addTo(mapLayer.getRoutingLayer());
+
+    var marker2 = L.marker([40.44103,-79.984])
+        .bindTooltip("Test Label 2",
+            {
+                permanent: true,
+                direction: 'right'
+            }
+        );
+
+    marker2.addTo(mapLayer.getRoutingLayer());
+    ///////
+
     $('#locationform').submit(function (e) {
         // no page reload
         e.preventDefault();
