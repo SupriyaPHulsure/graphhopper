@@ -23,6 +23,7 @@ import com.graphhopper.reader.gtfs.GraphHopperGtfs;
 import com.graphhopper.reader.gtfs.GtfsStorage;
 import com.graphhopper.reader.gtfs.PtFlagEncoder;
 import com.graphhopper.reader.gtfs.Request;
+import com.graphhopper.routing.util.BikeFlagEncoder;
 import com.graphhopper.routing.util.CarFlagEncoder;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.routing.util.FootFlagEncoder;
@@ -59,7 +60,7 @@ public class RealtimeIT {
     public static void init() {
         Helper.removeDir(new File(GRAPH_LOC));
         final PtFlagEncoder ptFlagEncoder = new PtFlagEncoder();
-        EncodingManager encodingManager = EncodingManager.create(Arrays.asList(new CarFlagEncoder(), ptFlagEncoder, new FootFlagEncoder()), 8);
+        EncodingManager encodingManager = EncodingManager.create(Arrays.asList(new CarFlagEncoder(), ptFlagEncoder, new BikeFlagEncoder()), 8);
         GHDirectory directory = GraphHopperGtfs.createGHDirectory(GRAPH_LOC);
         GtfsStorage gtfsStorage = GraphHopperGtfs.createGtfsStorage();
         graphHopperStorage = GraphHopperGtfs.createOrLoad(directory, encodingManager, ptFlagEncoder, gtfsStorage, Collections.singleton("files/sample-feed.zip"), Collections.emptyList());

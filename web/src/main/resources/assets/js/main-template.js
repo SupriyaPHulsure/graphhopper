@@ -50,6 +50,7 @@ var tileLayers = require('./config/tileLayers.js');
 var debug = false;
 var ghRequest = new GHRequest(host, ghenv.routing.api_key);
 var bounds = {};
+var markers = [];
 
 var metaVersionInfo;
 
@@ -86,29 +87,6 @@ $(document).ready(function (e) {
             initFromParams(state.data, true);
         });
     }
-
-    /////
-
-    var marker = L.marker([40.440468,-79.998464])
-        .bindTooltip("Test Label 1",
-            {
-                permanent: true,
-                direction: 'right'
-            }
-        );
-
-    marker.addTo(mapLayer.getRoutingLayer());
-
-    var marker2 = L.marker([40.44103,-79.984])
-        .bindTooltip("Test Label 2",
-            {
-                permanent: true,
-                direction: 'right'
-            }
-        );
-
-    marker2.addTo(mapLayer.getRoutingLayer());
-    ///////
 
     $('#locationform').submit(function (e) {
         // no page reload
@@ -572,7 +550,7 @@ function routeLatLng(request, doQuery) {
             return;
         }
 
-        function createClickHandler(geoJsons, currentLayerIndex, tabHeader, oneTab, hasElevation, details) {
+        function createClickHandler(geoJsons, currentLayerIndex, tabHeader, oneTab, hasElevation, details, path) {
             return function () {
 
                 var currentGeoJson = geoJsons[currentLayerIndex];
@@ -593,6 +571,8 @@ function routeLatLng(request, doQuery) {
                     mapLayer.clearElevation();
                     mapLayer.addElevation(currentGeoJson, details);
                 }
+                removeMarkers();
+               addMarkers(path);
 
                 headerTabs.find("li").removeClass("current");
                 routeResultsDiv.find("div").removeClass("current");
@@ -600,6 +580,51 @@ function routeLatLng(request, doQuery) {
                 tabHeader.addClass("current");
                 oneTab.addClass("current");
             };
+        }
+
+        function addMarkers(path) {
+            if('legs' in path && path.legs.length > 1){
+                for (var i = 0; i < path.legs.length; i++) {
+                    if(i != 0) {
+                        var label;
+                        if(path.legs[i].type == "walk"){
+                            label = "Public Transit to Bike";
+                            var m1 = L.marker([path.legs[i].geometry.coordinates[0][1], path.legs[i].geometry.coordinates[0][0]])
+                                .bindTooltip(label,
+                                    {
+                                        permanent: true,
+                                        direction: 'right'
+                                    }
+                                );
+                            m1.addTo(mapLayer.getRoutingLayer());
+                            markers.push(m1);
+                        }
+                        else{
+                            if(label == "Bike to Public Transit"){
+                                continue;
+                            }
+                            label = "Bike to Public Transit";
+                            var m2 = L.marker([path.legs[i].geometry.coordinates[0][1], path.legs[i].geometry.coordinates[0][0]])
+                                .bindTooltip(label,
+                                    {
+                                        permanent: true,
+                                        direction: 'right'
+                                    }
+                                );
+                            m2.addTo(mapLayer.getRoutingLayer());
+                            markers.push(m2);
+                        }
+                    }
+                }
+            }
+        }
+
+        function removeMarkers(){
+            var new_markers = []
+            markers.forEach(function(marker) {
+               mapLayer.removeLayerFromMap(marker);
+            })
+            markers = new_markers;
         }
 
         var headerTabs = $("<ul id='route_result_tabs'/>");
@@ -635,11 +660,16 @@ function routeLatLng(request, doQuery) {
 
         for (var pathIndex = 0; pathIndex < json.paths.length; pathIndex++) {
             var tabHeader = $("<li>").append((pathIndex + 1) + "<img class='alt_route_img' src='img/alt_route.png'/>");
-            if (pathIndex === 0)
-                firstHeader = tabHeader;
+
+
 
             headerTabs.append(tabHeader);
             var path = json.paths[pathIndex];
+
+            if (pathIndex === 0){
+                firstHeader = tabHeader;
+                addMarkers(path);
+            }
             var style = (pathIndex === 0) ? defaultRouteStyle : alternativeRouteStye;
 
             var geojsonFeature = {
@@ -656,7 +686,7 @@ function routeLatLng(request, doQuery) {
             mapLayer.addDataToRoutingLayer(geojsonFeature);
             var oneTab = $("<div class='route_result_tab'>");
             routeResultsDiv.append(oneTab);
-            tabHeader.click(createClickHandler(geoJsons, pathIndex, tabHeader, oneTab, request.hasElevation(), path.details));
+            tabHeader.click(createClickHandler(geoJsons, pathIndex, tabHeader, oneTab, request.hasElevation(), path.details, path));
 
             var routeInfo = $("<div class='route_description'>");
             if (path.description && path.description.length > 0) {
@@ -668,12 +698,13 @@ function routeLatLng(request, doQuery) {
             var tempRouteInfo;
             if(request.isPublicTransit()) {
                 var tempArrTime = moment(ghRequest.getEarliestDepartureTime())
-                                        .add(path.time, 'milliseconds')
-                                        .format('LT');
-                if(path.transfers >= 0)
+                    .add(path.time, 'milliseconds')
+                    .format('LT');
+                if (path.transfers >= 0)
                     tempRouteInfo = translate.tr("pt_route_info", [tempArrTime, path.transfers, tempDistance]);
                 else
                     tempRouteInfo = translate.tr("pt_route_info_walking", [tempArrTime, tempDistance]);
+
             } else {
                 var tmpDuration = translate.createTimeString(path.time);
                 tempRouteInfo = translate.tr("route_info", [tempDistance, tmpDuration]);

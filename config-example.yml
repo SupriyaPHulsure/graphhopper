@@ -140,9 +140,9 @@ graphhopper:
 # the Java resource path. Helpful for development of the web client.
 # Assumes that the web module is the working directory.
 #
-# assets:
-#  overrides:
-#    /maps: web/src/main/resources/assets/
+assets:
+  overrides:
+    /maps: web/src/main/resources/assets/
 
 # Dropwizard server configuration
 server:

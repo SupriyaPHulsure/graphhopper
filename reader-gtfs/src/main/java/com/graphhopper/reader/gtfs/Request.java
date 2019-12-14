@@ -32,8 +32,8 @@ public class Request {
     private int maxVisitedNodes = 1_000_000;
     private boolean profileQuery;
     private Boolean ignoreTransfers;
-    private double betaTransfers = 2.0;
-    private double betaBikeTime = 10.0;
+    private double betaTransfers = 5.0;
+    private double betaBikeTime = 15.0;
     private Integer limitSolutions;
     private boolean arriveBy;
     private double bikeSpeedKmH = 12.0;

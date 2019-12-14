@@ -23,6 +23,7 @@ import com.graphhopper.jackson.Jackson;
 import com.graphhopper.reader.gtfs.GraphHopperGtfs;
 import com.graphhopper.reader.gtfs.GtfsStorage;
 import com.graphhopper.reader.gtfs.PtFlagEncoder;
+import com.graphhopper.routing.util.BikeFlagEncoder;
 import com.graphhopper.routing.util.CarFlagEncoder;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.routing.util.FootFlagEncoder;
@@ -52,9 +53,9 @@ public class PtRouteResourceIT {
         Helper.removeDir(new File(GRAPH_LOC));
         final PtFlagEncoder ptFlagEncoder = new PtFlagEncoder();
         final CarFlagEncoder carFlagEncoder = new CarFlagEncoder();
-        final FootFlagEncoder footFlagEncoder = new FootFlagEncoder();
+        final BikeFlagEncoder bikeFlagEncoder = new BikeFlagEncoder();
 
-        EncodingManager encodingManager = EncodingManager.create(Arrays.asList(carFlagEncoder, ptFlagEncoder, footFlagEncoder), 8);
+        EncodingManager encodingManager = EncodingManager.create(Arrays.asList(carFlagEncoder, ptFlagEncoder, bikeFlagEncoder), 8);
         GHDirectory directory = GraphHopperGtfs.createGHDirectory(GRAPH_LOC);
         GtfsStorage gtfsStorage = GraphHopperGtfs.createGtfsStorage();
         GraphHopperStorage graphHopperStorage = GraphHopperGtfs.createOrLoad(directory, encodingManager, ptFlagEncoder, gtfsStorage, Collections.singleton("files/sample-feed.zip"), Collections.singleton("files/beatty.osm"));
